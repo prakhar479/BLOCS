@@ -1,5 +1,6 @@
 # Blockchain Layer Overview for Decentralized Storage System
 
+
 ## 1. Introduction
 The blockchain layer forms the foundation of the decentralized storage system. It manages critical functions such as distributed file storage, consensus, tokenomics, transaction verification, and maintaining the integrity of the network. This layer is designed to be scalable, secure, and optimized for peer-to-peer (P2P) interactions, without relying on centralized control.
 
