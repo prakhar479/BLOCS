@@ -139,3 +139,18 @@ To ensure data integrity, each shard is hashed and stored using cryptographic te
 ## 4. Conclusion
 
 The File Storage Layer is designed to provide secure, decentralized file storage and retrieval. By using sharding, encryption, replication, and a robust versioning system, it ensures that files are stored efficiently, with high availability and fault tolerance. Integration with the blockchain guarantees the immutability of file metadata and facilitates decentralized control over storage and retrieval processes.
+
+
+# File structure:
+#
+# src/
+# ├── main.rs
+# ├── file_storage_layer.rs
+# ├── shard.rs
+# ├── metadata.rs
+# ├── encryption.rs
+# ├── erasure_coding.rs
+# ├── distribution.rs
+# └── storage_node.rs
+
+# src/main.rs
