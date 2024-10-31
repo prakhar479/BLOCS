@@ -513,5 +513,3 @@ impl Logger {
     pub fn set_level(&mut self, level: LogLevel);
 }
 ```
-
-This documentation provides a comprehensive overview of the BLOCS system implementation, including all necessary interfaces, dependencies,

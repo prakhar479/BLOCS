@@ -1,0 +1,13 @@
+[package]
+name = "blocs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+libp2p = "0.38"
+polkadot-api = "0.9"
+ink = "3.0"
+sqlite = "0.26"
+rocksdb = "0.18"
