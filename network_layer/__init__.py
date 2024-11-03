@@ -1,4 +1,3 @@
-
 import asyncio
 from protocol.kad import KademliaNode
 from protocol.gossipsub import GossipProtocol

@@ -1,7 +1,5 @@
-# For Reed-Solomon encoding/decoding
+
 reedsolo==1.5.4
-# For RSA encryption and decryption
 pycryptodome==3.18.0
-# for loading YAML configuration
 Cython==3.0.11
 pyyaml==6.0.2
