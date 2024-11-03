@@ -1,8 +1,9 @@
+from typing import List, Dict
 from .encryption import decrypt_data
 from .redundancy import decode_file, decode_shard
 from .metadata import get_hash
 
-def Assimilate(shards, mapping, private_key, shard_parity=2):
+def Assimilate(shards: List[bytes], mapping: Dict[str, int], private_key: bytes) -> bytes:
     # Reorder shards based on mapping
     ordered_shards = [shards[mapping[get_hash(shard)]] for shard in shards]
     

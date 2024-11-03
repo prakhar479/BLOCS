@@ -1,56 +1,65 @@
 # network_layer/tests/test_network.py
-from network_layer_two.bootstrap_node import BootstrapNode
-from network_layer_two.node import Node
-import threading
+from network_layer.bootstrap_node import BootstrapNode
+from network_layer.node import Node
 
-CONFIG = {
-    "bootstrap_ip": "192.168.0.45",
-    "bootstrap_port": 44444,
-    "node_port": 44445,
-    "interface": "eth0",
-    "debug": 1
-}
+import time
+
+BOOT_PORT = 12345
+STORAGE_PORT = 9901
+CLIENT_PORT = 9602
+
+def test_bootstrapping():
+    bootstrap_node = BootstrapNode(node_id=1, host="localhost", port=BOOT_PORT)
+    bootstrap_node.start_bootstrap_node()
+
+    storage_node = Node(node_id=2, host="localhost", port=STORAGE_PORT, bootstrap_address=("localhost", BOOT_PORT))
+    storage_node.start_node()
+
+    client_node = Node(node_id=3, host="localhost", port=CLIENT_PORT, bootstrap_address=("localhost", BOOT_PORT))
+    client_node.start_node()
+
+    time.sleep(1)   
+
+    assert(len(bootstrap_node.peers) == 2)
+    assert(len(storage_node.peers) == 0)
+    assert(len(client_node.peers) == 1)
+    
+
+    storage_node.shutdown()
+    client_node.shutdown()
+    bootstrap_node.shutdown()
+
+def test_communication():
+    bootstrap_node = BootstrapNode(node_id=1, host="localhost", port=BOOT_PORT)
+    bootstrap_node.start_bootstrap_node()
+
+    storage_node = Node(node_id=2, host="localhost", port=STORAGE_PORT, bootstrap_address=("localhost", BOOT_PORT))
+    storage_node.start_node()
+
+    client_node = Node(node_id=3, host="localhost", port=CLIENT_PORT, bootstrap_address=("localhost", BOOT_PORT))
+    client_node.start_node()
+
+    time.sleep(1)
+
+    assert(len(bootstrap_node.peers) == 2)
+    assert(len(storage_node.peers) == 0)
+    assert(len(client_node.peers) == 1)
+
+    time.sleep(1)
+
+    recieved_messages = []
+
+    storage_node.handle_data = lambda packet: recieved_messages.append(packet)
+    client_node.send_data("Hello from client!")
+
+    time.sleep(1)
+
+    assert(len(recieved_messages) == 1)
+    assert(recieved_messages[0].data == "Hello from client!")
 
 
-def test_bootstrap_node():
-    bootstrap_node = BootstrapNode(
-        CONFIG["bootstrap_ip"], CONFIG["bootstrap_port"], CONFIG["interface"], CONFIG["debug"]
-    )
-    threading.Thread(target=bootstrap_node.start_bootstrap_node).start()
-    assert bootstrap_node.node is not None
+    storage_node.shutdown()
+    client_node.shutdown()
+    bootstrap_node.shutdown()
 
-def test_peer_registration_and_discovery():
-    bootstrap_node = BootstrapNode(
-        CONFIG["bootstrap_ip"], CONFIG["bootstrap_port"], CONFIG["interface"], CONFIG["debug"]
-    )
-    threading.Thread(target=bootstrap_node.start_bootstrap_node).start()
-
-    node_1 = Node(
-        node_id="node1",
-        ip="192.168.0.46",
-        port=44446,
-        interface="eth0:1",
-        bootstrap_ip=CONFIG["bootstrap_ip"],
-        bootstrap_port=CONFIG["bootstrap_port"],
-        debug=CONFIG["debug"]
-    )
-    node_1.start_node()
-
-    node_2 = Node(
-        node_id="node2",
-        ip="192.168.0.47",
-        port=44447,
-        interface="eth0:2",
-        bootstrap_ip=CONFIG["bootstrap_ip"],
-        bootstrap_port=CONFIG["bootstrap_port"],
-        debug=CONFIG["debug"]
-    )
-    node_2.start_node()
-
-    # Ensure node1 and node2 are registered with the bootstrap node
-    assert "node1" in bootstrap_node.peers
-    assert "node2" in bootstrap_node.peers
-
-    # Verify node1 and node2 can connect to each other after discovery
-    assert any(peer.bind_ip == "192.168.0.47" for peer in node_1.peers)
-    assert any(peer.bind_ip == "192.168.0.46" for peer in node_2.peers)
+test_bootstrapping()
