@@ -1,6 +1,4 @@
 from typing import Any
-from .node import Node
-
 # network_layer/handlers.py
 
 class DataPacket:
@@ -13,5 +11,5 @@ class DataPacket:
 
 class DataHandler:
     @staticmethod
-    def handle_data(node: Node, packet: DataPacket) -> None:
+    def handle_data(node, packet: DataPacket) -> None:
         print(f"Node {node.node_id} received data: {packet}")
