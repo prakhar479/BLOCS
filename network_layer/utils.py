@@ -1,5 +1,3 @@
-# network_layer/utils.py
-
 import socket
 
 def create_socket(host, port):

@@ -1,14 +1,17 @@
+from typing import Any
+from .node import Node
+
 # network_layer/handlers.py
 
 class DataPacket:
-    def __init__(self, sender_id, data):
-        self.sender_id = sender_id
-        self.data = data
+    def __init__(self, sender_id: int, data: Any) -> None:
+        self.sender_id: int = sender_id
+        self.data: Any = data
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.sender_id}: {self.data}"
 
 class DataHandler:
     @staticmethod
-    def handle_data(node, packet):
+    def handle_data(node: Node, packet: DataPacket) -> None:
         print(f"Node {node.node_id} received data: {packet}")

@@ -20,10 +20,10 @@ except FileNotFoundError:
     config_data = DEFAULT_CONFIG
 
 # Load Max Connections
-MAX_CONNECTIONS = config_data.get("MAX_CONNECTIONS", MAX_CONNECTIONS)
+MAX_CONNECTIONS = config_data.get("MAX_CONNECTIONS", DEFAULT_CONFIG["MAX_CONNECTIONS"])
 
 # Load Buffer Size
-BUFFER_SIZE = config_data.get("BUFFER_SIZE", BUFFER_SIZE)
+BUFFER_SIZE = config_data.get("BUFFER_SIZE", DEFAULT_CONFIG["BUFFER_SIZE"])
 
 # Load Retry Count
-RETRY_COUNT = config_data.get("RETRY_COUNT", RETRY_COUNT)
+RETRY_COUNT = config_data.get("RETRY_COUNT", DEFAULT_CONFIG["RETRY_COUNT"])

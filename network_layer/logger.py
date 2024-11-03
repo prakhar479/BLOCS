@@ -1,5 +1,3 @@
-# network_layer/logger.py
-
 import logging
 
 logging.basicConfig(
