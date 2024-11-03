@@ -1,0 +1,2 @@
+DEFAULT_SHARD_SIZE: 1  # Shard size in bytes
+DEFAULT_ERROR_CORRECTION: 10 # Error correction level
