@@ -1,5 +1,4 @@
-
-   [
+[
     {
       "inputs": [],
       "stateMutability": "nonpayable",
@@ -10,16 +9,36 @@
       "inputs": [
         {
           "indexed": true,
-          "internalType": "address",
-          "name": "server",
-          "type": "address"
+          "internalType": "bytes32",
+          "name": "fileId",
+          "type": "bytes32"
         },
         {
           "indexed": true,
           "internalType": "address",
-          "name": "client",
+          "name": "storageProvider",
           "type": "address"
-        },
+        }
+      ],
+      "name": "DealApproved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "fileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "DealCompleted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
         {
           "indexed": true,
           "internalType": "bytes32",
@@ -28,8 +47,33 @@
         },
         {
           "indexed": false,
+          "internalType": "string",
+          "name": "reason",
+          "type": "string"
+        }
+      ],
+      "name": "DealInvalidated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "fileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "client",
+          "type": "address"
+        },
+        {
+          "indexed": false,
           "internalType": "uint256",
-          "name": "payment",
+          "name": "space",
           "type": "uint256"
         },
         {
@@ -39,7 +83,7 @@
           "type": "uint256"
         }
       ],
-      "name": "DealCreated",
+      "name": "DealProposed",
       "type": "event"
     },
     {
@@ -47,64 +91,9 @@
       "inputs": [
         {
           "indexed": true,
-          "internalType": "address",
-          "name": "server",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
-        {
-          "indexed": true,
           "internalType": "bytes32",
           "name": "fileId",
           "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "bytes32",
-          "name": "fileHash",
-          "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "totalShards",
-          "type": "uint256"
-        }
-      ],
-      "name": "FileStored",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "server",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "fileId",
-          "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "shardIndex",
-          "type": "uint256"
         },
         {
           "indexed": false,
@@ -113,55 +102,45 @@
           "type": "uint256"
         }
       ],
-      "name": "ProofSubmitted",
+      "name": "ProofValidated",
       "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
+      "stateMutability": "payable",
+      "type": "fallback",
+      "payable": true
+    },
+    {
+      "inputs": [],
+      "name": "MAX_DURATION",
+      "outputs": [
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "server",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "fileId",
-          "type": "bytes32"
-        },
-        {
-          "indexed": false,
           "internalType": "uint256",
-          "name": "shardIndex",
+          "name": "",
           "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "bytes32",
-          "name": "shardHash",
-          "type": "bytes32"
         }
       ],
-      "name": "ShardStored",
-      "type": "event"
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
     },
     {
-      "inputs": [
+      "inputs": [],
+      "name": "PRICE_PER_GB_PER_HOUR",
+      "outputs": [
         {
-          "internalType": "address",
+          "internalType": "uint256",
           "name": "",
-          "type": "address"
+          "type": "uint256"
         }
       ],
-      "name": "balance",
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "VALIDATION_INTERVAL",
       "outputs": [
         {
           "internalType": "uint256",
@@ -175,61 +154,6 @@
     },
     {
       "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "name": "deals",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "duration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "payment",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "startTime",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "isActive",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        },
         {
           "internalType": "bytes32",
           "name": "",
@@ -239,39 +163,54 @@
       "name": "files",
       "outputs": [
         {
-          "internalType": "bytes32",
-          "name": "fileHash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalShards",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalSize",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
+          "internalType": "address payable",
+          "name": "client",
           "type": "address"
-        }
-      ],
-      "name": "userPublicKeys",
-      "outputs": [
+        },
         {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
+          "internalType": "address payable",
+          "name": "storageProvider",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "storageSpace",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "remainingAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "lastValidationTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isApproved",
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -284,8 +223,24 @@
       "payable": true
     },
     {
-      "inputs": [],
-      "name": "deposit",
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "fileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "storageSpace",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "durationHours",
+          "type": "uint256"
+        }
+      ],
+      "name": "proposeDeal",
       "outputs": [],
       "stateMutability": "payable",
       "type": "function",
@@ -295,294 +250,170 @@
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "publicKey",
-          "type": "bytes32"
-        }
-      ],
-      "name": "setUserPublicKey",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "withdraw",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "fileId",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "fileHash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalShards",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalSize",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "duration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "payment",
-          "type": "uint256"
-        }
-      ],
-      "name": "initializeFileStorage",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
-        {
-          "internalType": "bytes32",
           "name": "fileId",
           "type": "bytes32"
         },
         {
           "internalType": "uint256",
-          "name": "shardIndex",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "shardHash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "shardSize",
+          "name": "billingAmount",
           "type": "uint256"
         }
       ],
-      "name": "storeShard",
+      "name": "approveDeal",
       "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      "stateMutability": "payable",
+      "type": "function",
+      "payable": true
     },
     {
       "inputs": [
-        {
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "fileId",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "shardIndex",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "proofHash",
-          "type": "bytes32"
-        }
-      ],
-      "name": "submitShardProof",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "server",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
         {
           "internalType": "bytes32",
           "name": "fileId",
           "type": "bytes32"
         }
       ],
-      "name": "completeDeal",
+      "name": "validateProof",
       "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      "stateMutability": "payable",
+      "type": "function",
+      "payable": true
     },
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "server",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
-        {
           "internalType": "bytes32",
           "name": "fileId",
           "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "reason",
+          "type": "string"
         }
       ],
-      "name": "getFileMetadata",
+      "name": "invalidateDeal",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function",
+      "payable": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "storageSpace",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "durationHours",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateTotalAmount",
       "outputs": [
         {
-          "internalType": "bytes32",
-          "name": "fileHash",
-          "type": "bytes32"
-        },
-        {
           "internalType": "uint256",
-          "name": "totalShards",
+          "name": "",
           "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalSize",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "isActive",
-          "type": "bool"
         }
       ],
-      "stateMutability": "view",
+      "stateMutability": "pure",
       "type": "function",
       "constant": true
     },
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "server",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "fileId",
-          "type": "bytes32"
+          "internalType": "uint256",
+          "name": "totalAmount",
+          "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "shardIndex",
+          "name": "totalHours",
           "type": "uint256"
         }
       ],
-      "name": "getShardInfo",
+      "name": "calculatePaymentForInterval",
       "outputs": [
         {
-          "internalType": "bytes32",
-          "name": "hashedShardWithKey",
-          "type": "bytes32"
-        },
-        {
           "internalType": "uint256",
-          "name": "size",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "isActive",
-          "type": "bool"
-        },
-        {
-          "internalType": "uint256",
-          "name": "lastProofTime",
+          "name": "",
           "type": "uint256"
         }
       ],
-      "stateMutability": "view",
+      "stateMutability": "pure",
       "type": "function",
       "constant": true
     },
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "server",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "client",
-          "type": "address"
-        },
-        {
           "internalType": "bytes32",
           "name": "fileId",
           "type": "bytes32"
         }
       ],
-      "name": "getDealTerms",
+      "name": "getFileData",
       "outputs": [
         {
-          "internalType": "uint256",
-          "name": "duration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "payment",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "startTime",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "isActive",
-          "type": "bool"
+          "components": [
+            {
+              "internalType": "address payable",
+              "name": "client",
+              "type": "address"
+            },
+            {
+              "internalType": "address payable",
+              "name": "storageProvider",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "startTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "duration",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "storageSpace",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "remainingAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "lastValidationTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isActive",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isApproved",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ContractorFileStorage.FileData",
+          "name": "",
+          "type": "tuple"
         }
       ],
       "stateMutability": "view",
