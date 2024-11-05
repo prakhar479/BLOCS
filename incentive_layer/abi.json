@@ -106,11 +106,6 @@
       "type": "event"
     },
     {
-      "stateMutability": "payable",
-      "type": "fallback",
-      "payable": true
-    },
-    {
       "inputs": [],
       "name": "MAX_DURATION",
       "outputs": [
@@ -236,7 +231,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "durationHours",
+          "name": "durationBlocks",
           "type": "uint256"
         }
       ],
@@ -274,7 +269,13 @@
         }
       ],
       "name": "validateProof",
-      "outputs": [],
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
       "stateMutability": "payable",
       "type": "function",
       "payable": true
@@ -332,7 +333,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "totalHours",
+          "name": "totalBlock",
           "type": "uint256"
         }
       ],
@@ -414,6 +415,20 @@
           "internalType": "struct ContractorFileStorage.FileData",
           "name": "",
           "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "getBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
