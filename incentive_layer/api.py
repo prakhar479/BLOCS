@@ -146,39 +146,9 @@ def get_deal_status(file_id):
         "isApproved": deal[9]
     }
 
-storage_space = 5
-duration_hours = 5
-billing_amount = contract.functions.calculateTotalAmount(storage_space, duration_hours).call()
-print(f"BIILING AMOUNT{billing_amount}")
-print(contract.functions.getBalance().call())
-text = ''.join(random.choice(string.ascii_letters) for _ in range(10))
 client_address = '0xaE0e33E28AEE05144711F5000bC763e3145323ea'
 client_private_key = '0x8cde6b6f4acffa0093bb703f9aee6e4384b4f89235fe959c7e1633973932c280'
 
 server_address = '0xE70EB10De1E4F50050D6169D0985d93E92b3A322'
 server_private_key = '0x93f9a5010d72cc1cbf7e72229f605312791b594b1f181e7d1804979389af201c'
 
-tx_hash_propose = propose_deal(client_address, billing_amount, client_private_key, text, storage_space, duration_hours)
-print(f"Propose Deal Transaction hash: {tx_hash_propose}")
-
-print(contract.functions.getBalance().call())
-
-fil = w3.keccak(text=text)
-print(fil)
-print(contract.functions.getBalance().call())
-tx_hash_approve = approve_deal(text, billing_amount, server_address, server_private_key)
-print(contract.functions.getBalance().call())
-print(f"Approve Deal Transaction hash:{tx_hash_approve}")
-print(contract.functions.getBalance().call())
-print(contract.functions.validateProof(fil).call())
-print(contract.functions.getBalance().call())
-tx_hash_validate = validate_proof(text, client_address, client_private_key)
-
-print(f"Validate Proof Transaction hash: {tx_hash_validate} ")
-
-# tx_hash_invalidate = invalidate_deal(text, "NIGGAS ARE NOT FREE ANY MORE", client_address, client_private_key)
-# print(f"Invalidate Deal Transaction hash: {tx_hash_invalidate}")
-
-
-status = get_deal_status(text)
-print("Deal Status:", status)
