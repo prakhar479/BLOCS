@@ -6,7 +6,7 @@ import json
 rpc_server = "HTTP://127.0.0.1:7545"
 w3 = Web3(Web3.HTTPProvider(rpc_server))
 
-contract_address = "0xB2fdf1B14056e4b22549D64844c2A93f9c33f3D7"
+contract_address = "0xA09B19128f920Bca0D217308c831f0f0061B6cfa"
 
 
 with open("abi.json", "r") as abi_file:

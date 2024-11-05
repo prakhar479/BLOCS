@@ -22,7 +22,7 @@ contract ContractorFileStorage {
     // Constants
     uint256 public constant MAX_DURATION = 720 hours; // 30 days
     uint256 public constant VALIDATION_INTERVAL = 2 ; // blocks
-    uint256 public constant PRICE_PER_GB_PER_HOUR = 1;
+    uint256 public constant PRICE_PER_GB_PER_HOUR = 1 wei;
 
     // Storage
     // FileID=>FileData
@@ -74,11 +74,26 @@ contract ContractorFileStorage {
         emit DealProposed(fileId, msg.sender, storageSpace, durationBlocks);
 
     }
+    function completeDeal(bytes32 fileId) public  {
+        require(files[fileId].client != address(0), "[completedeal]: File does not exist");
+        require(files[fileId].isActive, "[completedeal]: Deal is not active");
 
+//        FileData storage file = files[fileId];
+        files[fileId].isActive = false;
+
+//        if (files[fileId].remainingAmount > 0) {
+//            require(files[fileId].storageProvider != address(0), "[completedeal]: Invalid storage provider address");
+//
+//            payable(files[fileId].storageProvider).transfer(files[fileId].remainingAmount);
+//        }
+        delete files[fileId];
+
+        emit DealCompleted(fileId);
+    }
     function approveDeal(bytes32 fileId, uint256 billingAmount) external payable {
         require(!files[fileId].isApproved, "[approveDeal]: Deal already approved");
         require(files[fileId].client != address(0), "[approveDeal]: Deal does not exist");
-        require(billingAmount * 1 ether == files[fileId].totalAmount, "[approveDeal]: Mismatch between two prices!");
+        require(billingAmount * 1 wei == files[fileId].totalAmount, "[approveDeal]: Mismatch between two prices!");
         require(files[fileId].client != msg.sender, "[approveDeal]: Only server can approve the deal");
 
         files[fileId].storageProvider = payable(msg.sender);
@@ -124,26 +139,11 @@ contract ContractorFileStorage {
         emit DealInvalidated(fileId, reason);
     }
 
-    function completeDeal(bytes32 fileId) internal {
-        require(files[fileId].client != address(0), "[completedeal]: File does not exist");
-        require(files[fileId].isActive, "[completedeal]: Deal is not active");
 
-//        FileData storage file = files[fileId];
-        files[fileId].isActive = false;
-
-//        if (files[fileId].remainingAmount > 0) {
-//            require(files[fileId].storageProvider != address(0), "[completedeal]: Invalid storage provider address");
-//
-//            payable(files[fileId].storageProvider).transfer(files[fileId].remainingAmount);
-//        }
-        delete files[fileId];
-
-        emit DealCompleted(fileId);
-    }
 
     function calculateTotalAmount(uint256 storageSpace, uint256 durationHours) public pure returns (uint256) {
         uint256 spaceInGB = storageSpace ;
-        return spaceInGB * durationHours * 1 ether;
+        return spaceInGB * durationHours * 1 wei;
     }
 
 
