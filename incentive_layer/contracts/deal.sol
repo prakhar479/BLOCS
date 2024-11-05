@@ -87,7 +87,37 @@ contract ContractorFileStorage {
         require(success, "Transfer failed");
     }
     
-    function initializeFileStorage(
+    struct DealProposal {
+        address server;
+        uint256 payment;
+        uint256 duration;
+        bytes32 fileHash;
+        uint256 totalShards;
+        uint256 totalSize;
+        bool clientApproved;
+        bool serverApproved;
+    }
+
+    mapping(bytes32 => DealProposal) public dealProposals;
+
+
+    // Event for deal proposal
+    event DealProposed(
+        address indexed server,
+        address indexed client,
+        bytes32 indexed fileId,
+        uint256 payment,
+        uint256 duration
+    );
+
+    // Event for deal approval
+    event DealApproved(
+        address indexed approver,
+        bytes32 indexed fileId
+    );
+
+    // Server proposes a deal
+    function proposeDeal(
         address client,
         bytes32 fileId,
         bytes32 fileHash,
@@ -99,49 +129,126 @@ contract ContractorFileStorage {
         require(duration <= MAX_DURATION, "Duration exceeds maximum");
         require(payment > 0, "Payment required");
         require(totalShards > 0, "Must have at least one shard");
-        require(balance[client] >= payment, "Insufficient client balance");
-        FileMetadata storage fileMetadata = files[msg.sender][client][fileId];
-        fileMetadata.fileHash = fileHash;
-        fileMetadata.totalShards = totalShards;
-        fileMetadata.totalSize = totalSize;
-        
-        DealTerms storage dealTerms = deals[msg.sender][client][fileId];
-        dealTerms.duration = duration;
-        dealTerms.payment = payment;
+
+        DealProposal storage proposal = dealProposals[fileId];
+        require(proposal.server == address(0), "Deal already proposed");
+
+        proposal.server = msg.sender;
+        proposal.payment = payment;
+        proposal.duration = duration;
+        proposal.fileHash = fileHash;
+        proposal.totalShards = totalShards;
+        proposal.totalSize = totalSize;
+        proposal.serverApproved = true;
+
+        emit DealProposed(msg.sender, client, fileId, payment, duration);
+    }
+
+    // Client approves the deal
+    function approveClientDeal(bytes32 fileId, uint256 payment) external {
+        DealProposal storage proposal = dealProposals[fileId];
+        require(proposal.server != address(0), "Deal not proposed");
+        require(!proposal.clientApproved, "Deal already approved");
+        require(balance[msg.sender] >= proposal.payment, "Insufficient balance");
+        require(payment==proposal.payment, "Payment mismatch");
+        proposal.clientApproved = true;
+        emit DealApproved(msg.sender, fileId);
+
+        if(proposal.serverApproved && proposal.clientApproved) {
+            _initializeFileStorage(
+                msg.sender,
+                fileId,
+                proposal
+            );
+        }
+    }
+
+    // Server can update their approval (in case they need to withdraw)
+//    function approveServerDeal(bytes32 fileId, bool approved) external {
+//        DealProposal storage proposal = dealProposals[fileId];
+//        require(proposal.server == msg.sender, "Not the server");
+//        require(proposal.server != address(0), "Deal not proposed");
+//
+//        proposal.serverApproved = approved;
+//        emit DealApproved(msg.sender, fileId);
+//
+//        if(proposal.serverApproved && proposal.clientApproved) {
+//            _initializeFileStorage(
+//                msg.sender,
+//                fileId,
+//                proposal
+//            );
+//        }
+//    }
+
+    function _initializeFileStorage(
+        address client,
+        bytes32 fileId,
+        DealProposal storage proposal
+    ) private {
+        FileMetadata storage fileMetadata = files[proposal.server][client][fileId];
+        require(fileMetadata.totalShards == 0, "File already initialized");
+
+        fileMetadata.fileHash = proposal.fileHash;
+        fileMetadata.totalShards = proposal.totalShards;
+        fileMetadata.totalSize = proposal.totalSize;
+
+        DealTerms storage dealTerms = deals[proposal.server][client][fileId];
+        dealTerms.duration = proposal.duration;
+        dealTerms.payment = proposal.payment;
         dealTerms.startTime = block.timestamp;
         dealTerms.isActive = true;
-        
-        
-        balance[client] -= payment;
-        
-        emit FileStored(msg.sender, client, fileId, fileHash, totalShards);
-        emit DealCreated(msg.sender, client, fileId, payment, duration);
+
+        balance[client] -= proposal.payment;
+
+        // delete dealProposals[fileId];
+
+        emit FileStored(proposal.server, client, fileId, proposal.totalShards, proposal.totalSize);
+        emit DealCreated(proposal.server, client, fileId, proposal.payment, proposal.duration);
     }
-    
+
+    function getDealProposal(bytes32 fileId) external view returns (
+        address server,
+        uint256 payment,
+        uint256 duration,
+        uint256 totalShards,
+        uint256 totalSize,
+        bool clientApproved,
+        bool serverApproved
+    ) {
+        DealProposal storage proposal = dealProposals[fileId];
+        return (
+            proposal.server,
+            proposal.payment,
+            proposal.duration,
+            proposal.totalShards,
+            proposal.totalSize,
+            proposal.clientApproved,
+            proposal.serverApproved
+        );
+    }
         function storeShard(
-        address client,
+        address server,
         bytes32 fileId,
         uint256 shardIndex,
         bytes32 shardHash,
         uint256 shardSize
 
     ) external {
-        require(deals[msg.sender][client][fileId].isActive, "No active deal");
+        require(deals[server][msg.sender][fileId].isActive, "No active deal");
 
-        FileShard storage shard = files[msg.sender][client][fileId].shards[shardIndex];
+        FileShard storage shard = files[server][msg.sender][fileId].shards[shardIndex];
         require(!shard.isActive, "Shard already stored");
-        bytes32 userPublicKey = userPublicKeys[client];
-        // Hash the shardHash with the user's public key to create a unique identifier
+        bytes32 userPublicKey = userPublicKeys[msg.sender];
         bytes32 hashWithKey = keccak256(abi.encodePacked(shardHash, userPublicKey));
         
-        // Store the hashed shard with user public key
         shard.hashedShardWithKey = hashWithKey;
         shard.size = shardSize;
         shard.timestamp = block.timestamp;
         shard.isActive = true;
         shard.lastProofTime = block.timestamp;
 
-        emit ShardStored(msg.sender, client, fileId, shardIndex, shardHash);
+        emit ShardStored(server, msg.sender, fileId, shardIndex, shardHash);
     }
 
     function submitShardProof(
