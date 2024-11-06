@@ -1,5 +1,9 @@
+
+
+## file storage layer
 DEFAULT_SHARD_SIZE: 1024  # Shard size in bytes
 DEFAULT_ERROR_CORRECTION: 10 # Error correction level
-MAX_CONNECTIONS: 10  # Maximum number of connections for a node
+
+
+## network layer
 BUFFER_SIZE: 2048  # Buffer size for reading and writing data in network (bytes)
-RETRY_COUNT: 3  # Number of retries for a failed request

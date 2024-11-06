@@ -1,105 +1,151 @@
 import socket
-import threading
-import pickle
-from typing import Set, Tuple, Optional, Any
-from .handlers import DataPacket, DataHandler
-from .utils import connect_socket
-from .logger import logger
-from .config import BUFFER_SIZE, MAX_CONNECTIONS, RETRY_COUNT
+import random
+# import json
+from typing import List, Tuple, Union, Optional
+from network_layer.message import Message
+
 
 class Node:
-    def __init__(self, node_id: str, host: str, port: int, 
-                 bootstrap_address: Optional[Tuple[str, int]] = None) -> None:
-        self.node_id: str = node_id
-        self.host: str = host
-        self.port: int = port
-        self.bootstrap_address: Optional[Tuple[str, int]] = bootstrap_address
-        self.peers: Set[Tuple[str, str, int]] = set()  # Each peer is stored as a tuple (node_id, host, port)
-        self.socket: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((self.host, self.port))
-        self.socket.listen(MAX_CONNECTIONS)
-        self.running: bool = True
+    SERVER_IP: str = socket.gethostbyname(socket.gethostname())
+    SERVER_PORT: Optional[int] = None
+    SERVER_ADDR: Optional[Tuple[str, int]] = None
 
-    def __str__(self) -> str:
-        return f"Node {self.node_id} on {self.host}:{self.port}"
+    GENESIS_NODE_ADDR: str = "localhost"  # boot node address
+    GENESIS_NODE_PORT: int = 5050  # boot node port
 
-    def start_node(self) -> None:
-        threading.Thread(target=self.listen_for_peers, daemon=True).start()
-        if self.bootstrap_address:
-            self.connect_to_bootstrap()
-        logger.info(f"Node {self.node_id} started on {self.host}:{self.port}")
+    nodes: List[socket.socket] = list()  # connections
+    connections: List[Tuple[str, int]] = list()  # connection addresses
+    incomingConnections: List[socket.socket] = list()
+    connections_json: List[dict] = list()
 
-    def get_peers(self) -> Set[Tuple[str, str, int]]:
-        return self.peers
+    message_logs: List[str] = list()
 
-    def connect_to_bootstrap(self) -> None:
+    nodes_in_network: List[dict] = list()
+
+    isJoinedNetwork: bool = False
+
+    def __init__(self, ip: str = SERVER_IP, port: Optional[int] = SERVER_PORT) -> None:
+        self.SERVER_IP = ip
+        self.SERVER_PORT = port
+        self.SERVER_ADDR = (ip, port)
+
+    def totalConection(self) -> int:
+        return len(self.connections)
+
+    def find_addr_index(self, ip: str, port: int) -> int:
+        index = 0
+        result = -1
+        for node in self.connections:
+            if (node[0] == ip and node[1] == port):
+                result = index
+                break
+            index += 1
+        return result
+
+    def find_connection_index(self, ip: str, port: int) -> int:
+        index = 0
+        result = -1
+        for node in self.nodes:
+            peername = node.getpeername()
+            if (peername[0] == ip and peername[1] == port):
+                result = index
+                break
+            index += 1
+        return result
+
+    def find_json_index(self, ip: str, port: int) -> int:
+        index = 0
+        result = -1
+        for node in self.connections_json:
+            if (node["ip_addr"] == ip and node["port"] == port):
+                result = index
+                break
+            index += 1
+        return result
+
+    def getRandomNode(self) -> Optional[dict]:
+        json_temp = self.connections_json.copy()  # all active connections are copied
+        total_node = self.totalConection()  # calculate total connected node
+        if total_node == 0:
+            return None  # if there is no any connection, return self ip and port
+        rnd = random.randint(0, total_node-1)  # random index
+        return json_temp[rnd]
+
+    def remove_connection(self, conn: socket.socket, ip: str, port: int) -> None:
         try:
-            s: socket.socket = connect_socket(*self.bootstrap_address)
-            s.sendall(pickle.dumps((self.node_id, self.host, self.port)))
-            peer_list: Set[Tuple[str, str, int]] = pickle.loads(s.recv(BUFFER_SIZE))
-            self.peers.update(peer_list)
-            logger.info(f"Node {self.node_id} connected to bootstrap; Peers: {self.peers}")
-            s.close()
-            self.connect_to_peers()
-        except Exception as e:
-            logger.error(f"Node {self.node_id} failed to connect to bootstrap: {e}")
-            self.shutdown()
-
-    def connect_to_peers(self) -> None:
-        for peer in self.peers:
-            peer_id, peer_host, peer_port = peer
-            if peer_id != self.node_id:
-                for attempt in range(RETRY_COUNT):
-                    try:
-                        s: socket.socket = connect_socket(peer_host, peer_port)
-                        s.sendall(pickle.dumps(DataPacket(self.node_id, f"Hello from Node {self.node_id}")))
-                        logger.info(f"Node {self.node_id} connected to peer {peer_id} at {peer_host}:{peer_port}")
-                        s.close()
-                        break
-                    except Exception as e:
-                        logger.warning(f"Node {self.node_id} failed to connect to peer {peer_id} "
-                                    f"at {peer_host}:{peer_port} on attempt {attempt + 1}: {e}")
-                        if attempt == RETRY_COUNT - 1:
-                            logger.error(f"Node {self.node_id} exhausted retries for peer {peer_id}")
-
-    def listen_for_peers(self) -> None:
-        while self.running:
-            try:
-                conn, _ = self.socket.accept()
-                threading.Thread(target=self.handle_peer, args=(conn,), daemon=True).start()
-            except Exception as e:
-                logger.error(f"Node {self.node_id} encountered error while listening for peers: {e}")
-                self.shutdown()
-
-    def handle_peer(self, conn: socket.socket) -> None:
+            conn_index = self.find_connection_index(ip, port)
+        except:
+            conn_index = -1
+        if (conn_index != -1):
+            self.nodes.pop(conn_index)
         try:
-            data: bytes = conn.recv(BUFFER_SIZE)
-            packet: DataPacket = pickle.loads(data)
-            self.handle_data(packet)
-        except Exception as e:
-            logger.error(f"Node {self.node_id} failed to handle data from peer: {e}")
-        finally:
-            conn.close()
-
-    def send_data(self, peer: Tuple[str, str, int], data: Any) -> None:
+            node_index = self.find_addr_index(ip, port)
+        except:
+            node_index = -1
+        if (node_index != -1):
+            self.connections.pop(node_index)
         try:
-            peer_id, peer_host, peer_port = peer
-            s: socket.socket = connect_socket(peer_host, peer_port)
-            packet: DataPacket = DataPacket(self.node_id, data)
-            s.sendall(pickle.dumps(packet))
-            s.close()
-            logger.info(f"Node {self.node_id} sent data to peer {peer_id} at {peer_host}:{peer_port}")
-        except Exception as e:
-            logger.error(f"Node {self.node_id} failed to send data to peer {peer_id} at {peer_host}:{peer_port}: {e}")
+            node_index = self.find_json_index(ip, port)
+        except:
+            node_index = -1
+        if (node_index != -1):
+            self.connections_json.pop(node_index)
+        print(self.nodes)
+        print(self.connections)
 
-    def broadcast_data(self, data: Any) -> None:
-        for peer in self.peers:
-            self.send_data(peer, data)
+    def getSelfOrAdjacent(self) -> Union[str, List[dict]]:
+        total_adj = self.totalConection()
+        server_json = {"ip_addr": self.SERVER_IP, "port": self.SERVER_PORT}
+        if total_adj == 0:
+            return self.merge_command("NODE_CON_ADDR", f"({self.SERVER_IP},{self.SERVER_PORT})")
+        if total_adj == 1:
+            temp_json_list = self.connections_json.copy()
+            temp_json_list.append(server_json)
+            return temp_json_list
+        if (total_adj >= 2):
+            copy_json = self.connections_json.copy()
+            copy_json.append(server_json)
+            total_return = random.randint(
+                2, total_adj+1)  # +1 is for self address
+            arr = list(range(0, total_adj+1))
+            random.shuffle(arr)
+            arr = arr[0:total_return]
+            print(f"{total_return} , {arr}")
+            temp_json_list = list()
+            for i in arr:
+                temp_json_list.append(copy_json[i])
+            print(temp_json_list)
+            return temp_json_list
 
-    def handle_data(self, packet: DataPacket) -> None:
-        DataHandler.handle_data(self, packet)
+    @classmethod
+    def set_node(cls, ip: str, port: int) -> None:
+        cls.SERVER_PORT = port
+        cls.SERVER_IP = ip
+        cls.SERVER_ADDR = (ip, port)
 
-    def shutdown(self) -> None:
-        self.running = False
-        self.socket.close()
-        logger.info(f"Node {self.node_id} on {self.host}:{self.port} has shut down.")
+    @staticmethod
+    def calculateMsgLen(msg: str) -> bytes:
+        message = msg.encode("utf-8")
+        msg_len = len(message)
+        send_len = str(msg_len).encode("utf-8")
+        send_len += b' ' * (64 - len(send_len))
+        return send_len
+
+    @staticmethod
+    def merge_command(cmd: str, msg: str) -> str:
+        message = f"{cmd}({msg})"
+        print(message)
+        return message
+
+    @staticmethod
+    def split_command(cmd: str, msg: str) -> str:
+        length = len(cmd)
+        message = msg[length+1:-1]
+        print(message)
+        return message
+
+    def create_message(self, msg: str, title: str, sender_ip: str = SERVER_IP, sender_port: Optional[int] = SERVER_PORT, reciever_ip: str = "all", reciever_port: Optional[int] = None) -> str:
+        if sender_port is None:
+            sender_port = self.SERVER_PORT
+        message = Message(sender_ip, sender_port, reciever_ip, reciever_port)
+        return message.msg(msg, title)

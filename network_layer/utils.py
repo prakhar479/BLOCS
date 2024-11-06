@@ -1,12 +1,18 @@
-import socket
+from termcolor import colored
 
-def create_socket(host, port):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.settimeout(5)
-    s.bind((host, port))
-    return s
+def print_colored(text, clr="white", endl=1):
+    endline = "\n"*endl
 
-def connect_socket(host, port):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((host, port))
-    return s
+    print(colored(text, clr), end=endline)
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'

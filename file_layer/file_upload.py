@@ -15,7 +15,7 @@ def Distribute(file_obj: Any, private_key: bytes, num_shards: int = None) -> Tup
     encoded_file_data: bytes = encode_file(file_data)
 
     # Calculate shard size based on number of shards
-    shard_size: int = len(encoded_file_data) // num_shards if num_shards else DEFAULT_SHARD_SIZE
+    shard_size: int = math.ceil(len(encoded_file_data) / num_shards) if num_shards else DEFAULT_SHARD_SIZE
     
     # Split file data into shards
     shards: List[bytes] = split_data(encoded_file_data, shard_size)

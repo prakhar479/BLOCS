@@ -8,6 +8,7 @@ CONFIG_PATH = os.path.join(os.path.dirname(__file__), "../config.yaml")
 DEFAULT_CONFIG = {
     "DEFAULT_SHARD_SIZE": 1024,  # Fallback shard size in bytes
     "DEFAULT_ERROR_CORRECTION": 10,  # Default error correction level
+    "DEFAULT_PROOF_HASH_ALGO": "sha256" # Default proof hash algorithm
 }
 
 # Load configuration from the YAML file
@@ -22,3 +23,5 @@ except FileNotFoundError:
 DEFAULT_SHARD_SIZE = config_data.get("DEFAULT_SHARD_SIZE", DEFAULT_CONFIG["DEFAULT_SHARD_SIZE"])
 # Extract the error correction level, falling back to default if missing
 DEFAULT_ERROR_CORRECTION = config_data.get("DEFAULT_ERROR_CORRECTION", DEFAULT_CONFIG["DEFAULT_ERROR_CORRECTION"])
+# Extract the proof hash algorithm, falling back to default if missing
+DEFAULT_PROOF_HASH_ALGO = config_data.get("DEFAULT_PROOF_HASH_ALGO", DEFAULT_CONFIG["DEFAULT_PROOF_HASH_ALGO"])

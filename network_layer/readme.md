@@ -1,184 +1,175 @@
 # Network Layer Module
 
-## Overview
+## Features
 
-The `network_layer` module provides a framework to create a decentralized network with peer-to-peer communication capabilities. It includes a `Node` class for general peer nodes and a `BootstrapNode` class that serves as a discovery point for new nodes joining the network. The module supports sending and broadcasting data packets across nodes and includes features for error handling, retry logic, and detailed logging.
+This Python module implements a simple peer-to-peer (P2P) network framework using TCP/IP connections. The network is based on a decentralized architecture where each node can communicate with other nodes directly without the need for a central server.
 
----
+## How it Works
 
-## Directory Structure
+The network is built around the concept of a "Genesis Node" - a single node that every other node in the network knows the IP address and port of. When a new node wants to join the network, it first connects to the Genesis Node to discover other existing nodes.
 
-The `network_layer` directory is organized as follows:
+The general flow of joining the network is as follows:
 
+1. The new node (called the "Candidate Node") connects to the Genesis Node.
+2. The Candidate Node asks the Genesis Node for the address of a random node already in the network.
+3. The Genesis Node responds with the address of a random existing node.
+4. The Candidate Node then connects to the random node and asks for the list of all nodes in the network.
+5. The random node sends the Candidate Node the list of all known nodes in the network.
+6. The Candidate Node then connects to all the nodes in the list and joins the network.
+7. The Candidate Node then broadcasts a message to the network, informing all other nodes that it has joined.
+
+## Network Setup
+
+The module provides three main methods for setting up the network:
+
+1. `start()`: Start the node on a specific port
+2. `join_network()`: Join the network by connecting to the Genesis Node 
+3. `stop()`: Stop the node and close all connections
+
+## Message Communication
+
+The module provides three main methods for communication between nodes:
+
+1. `broadcast()`: Send a message to all nodes in the network
+2. `send()`: Send a direct message to a specific node
+3. `reply()`: Reply to a received message
+
+The `Node` class also provides a handler method `handle_message()` that can be overridden to process incoming messages
+
+### Message Format
+
+Messages are sent in JSON format with the following structure:
+
+```json
+{
+    "id": "fbc019f3a87787f904b54875f62e2193445f0e0f4e82f6978d77dbe29d7a9894",
+    "title": "#BROADCAST",
+    "message": "Hello world",
+    "time": 1617555967.1199386,
+    "sender_ip": "192.168.1.100",
+    "sender_port": 5050
+}
 ```
-network_layer/
-├── __init__.py            # Initializes the package
-├── config.py              # Configuration settings for the network
-├── node.py                # Node class for general nodes in the network
-├── bootstrap_node.py      # BootstrapNode class for initial discovery nodes
-├── handlers.py            # Data packet and handler definitions
-├── logger.py              # Logger setup for logging network activity
-├── readme.md              # Documentation
-└── utils.py               # Utility functions for creating and connecting sockets
-```
 
----
+## Usage
 
-## Configuration
+### Creating a Genesis Node
 
-The `config.py` file includes settings used across the module:
-
-- `MAX_CONNECTIONS`: Maximum number of simultaneous connections allowed per node.
-- `BUFFER_SIZE`: Buffer size for data transmission.
-- `TIMEOUT`: Timeout in seconds for network connections.
-- `RETRY_COUNT`: Number of times a node retries connection to a peer on failure.
-
----
-
-## Classes and Methods
-
-### Node Class
-
-The `Node` class represents a general peer in the network. Nodes can connect to a `BootstrapNode` to discover peers and communicate with them directly.
-
-#### Constructor
 ```python
-Node(node_id: int, host: str, port: int, bootstrap_address: tuple = None)
+from Network import Network
+
+genesis_node = Network("localhost")  # Use "localhost" for local testing, or the actual IP address
+genesis_node.start(5050)  # Start the server on port 5050
+
+# The Genesis Node is now running and ready to accept connections
 ```
 
-- `node_id` (int): Unique identifier for the node.
-- `host` (str): Host address of the node.
-- `port` (int): Port on which the node listens.
-- `bootstrap_address` (tuple): Optional, address `(host, port)` of the `BootstrapNode` for peer discovery.
+### Joining the Network
 
-#### Key Methods
-- `start_node()`: Starts the node and connects to the bootstrap server if provided.
-- `send_data(peer, data)`: Sends a data packet to a specific peer identified by `(peer_id, peer_host, peer_port)`.
-- `broadcast_data(data)`: Broadcasts a data packet to all connected peers.
-- `handle_data(packet)`: Processes received data packets. This can be customized as needed.
-- `shutdown()`: Shuts down the node, closes sockets, and stops listening for connections.
-- `get_peers()`: Returns a list of connected peers as `(peer_id, peer_host, peer_port)` tuples.
-
-### BootstrapNode Class
-
-The `BootstrapNode` class inherits from `Node` and functions as a central discovery point, storing a list of connected peers and sharing it with new nodes joining the network.
-
-#### Constructor
 ```python
-BootstrapNode(node_id: int, host: str, port: int)
+from Network import Network
+
+new_node = Network("localhost")
+new_node.start(5051)  # Start the server on a different port
+new_node.join_network()  # Join the network
 ```
 
-- `node_id` (int): Unique identifier for the bootstrap node.
-- `host` (str): Host address of the bootstrap node.
-- `port` (int): Port on which the bootstrap node listens.
+### Sending Messages
 
-#### Key Methods
-- `start_bootstrap_node()`: Starts the bootstrap node to listen for incoming peer connections.
-- `shutdown()`: Shuts down the bootstrap node, closing all connections and logging the shutdown.
+#### Broadcasting Messages
 
----
-
-## Usage Examples
-
-### 1. Starting a Bootstrap Node
-
-To initialize and start a bootstrap node:
 ```python
-from network_layer.bootstrap_node import BootstrapNode
-
-bootstrap_node = BootstrapNode(node_id=1, host="localhost", port=8000)
-bootstrap_node.start_bootstrap_node()
+# Send a broadcast message to all nodes
+node.broadcast("Hello, P2P network!")
 ```
 
-This will create a central discovery point that new nodes can connect to and retrieve a list of active peers.
+#### Sending Direct Messages
 
-### 2. Starting a General Node
-
-To initialize and start a general node, passing the bootstrap address to enable peer discovery:
 ```python
-from network_layer.node import Node
+# Create a message
+message = node.short_json_msg("#DIRECT_MESSAGE", "Hello specific node!")
 
-node = Node(node_id=2, host="localhost", port=8001, bootstrap_address=("localhost", 8000))
-node.start_node()
+# Send the message and wait for response (hasResponse=1)
+response = node.send(connection, message, hasResponse=1)
+
+# Send message without waiting for response
+node.send(connection, message, hasResponse=0)
 ```
 
-When this node starts, it connects to the bootstrap node, retrieves the list of peers, and attempts to establish connections with them.
+#### Replying to Messages
 
-### 3. Sending and Broadcasting Data
-
-To send a data packet to a specific peer:
 ```python
-# Assuming peer = (peer_id, peer_host, peer_port)
-node.send_data(peer=("3", "localhost", 8002), data="Hello, Peer 3!")
+# Reply to a received message
+def handle_message(self, conn, message):
+    # Process the received message
+    response = self.short_json_msg("#REPLY", "Message received!")
+    self.reply(conn, response)
 ```
 
-To broadcast a message to all connected peers:
+### Example: Interactive Chat Node
+
+Here's an example of how to create an interactive chat node that can send and receive messages:
+
 ```python
-node.broadcast_data(data="Hello, everyone!")
+from Network import Network
+import threading
+
+class ChatNode:
+    def __init__(self, ip="localhost", port=5050):
+        self.network = Network(ip)
+        self.network.start(port)
+        
+        if port != 5050:  # If not genesis node
+            self.network.join_network()
+        
+        # Start listening for messages in a separate thread
+        self.listen_thread = threading.Thread(target=self.listen_for_messages)
+        self.listen_thread.daemon = True
+        self.listen_thread.start()
+    
+    def listen_for_messages(self):
+        while True:
+            # Handle incoming messages
+            pass
+    
+    def send_message(self, message):
+        self.network.broadcast(message)
+    
+    def send_direct_message(self, recipient_conn, message):
+        msg = self.network.short_json_msg("#DIRECT_MESSAGE", message)
+        response = self.network.send(recipient_conn, msg, hasResponse=1)
+        return response
+
+# Usage
+if __name__ == "__main__":
+    # Create a chat node
+    node = ChatNode(port=5051)
+    
+    # Main loop for sending messages
+    while True:
+        message = input("Enter message: ")
+        if message.lower() == 'quit':
+            break
+        node.send_message(message)
 ```
 
-### 4. Handling Data Packets
+## Message Types
 
-The `Node` class has a `handle_data` method that can be customized to define how each node should handle incoming data. By default, this method uses `DataHandler` to print received data. You can override `handle_data` as needed:
+The module supports several types of messages:
+
+1. `#BROADCAST`: Send to all nodes in the network
+2. `#NODE_CON_ADDR`: Used when establishing connections
+3. `#DIRECT_MESSAGE`: Send to a specific node
+4. `#REPLY`: Used for responses
+5. `#GIVE_NODES_IN_NETWORK`: Request network node list
+6. `#JOINED_IN_NETWORK`: Broadcast when a new node joins
+
+### Creating Custom Messages
+
 ```python
-def custom_handle_data(self, packet):
-    print(f"Custom handler: Node {self.node_id} received packet: {packet}")
-
-node.handle_data = custom_handle_data.__get__(node, Node)  # Bind custom handler
-```
-
-### 5. Shutting Down a Node
-
-To gracefully shut down a node:
-```python
-node.shutdown()
-```
-
-This will close the socket, terminate active connections, and log the shutdown.
-
----
-
-## Logging
-
-The module uses Python’s `logging` module to track events, errors, and network activity. Logs are saved in `network.log` and provide information about:
-- Node start and shutdown events.
-- Peer connections and disconnections.
-- Data packet transmissions.
-- Connection failures and retry attempts.
-
-The logging setup can be customized in `logger.py`:
-```python
-# Example of logging setup in logger.py
-import logging
-
-logging.basicConfig(
-    filename="network.log",
-    filemode="a",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.DEBUG
+# Create a custom message
+message = node.short_json_msg(
+    title="#CUSTOM_MESSAGE",
+    message="Your message content"
 )
-logger = logging.getLogger("NetworkLayer")
 ```
-
----
-
-## Error Handling and Retry Logic
-
-The module includes error handling for various network operations:
-- **Graceful Cleanup**: Nodes automatically close sockets and terminate threads on errors.
-- **Retry Logic**: Nodes retry connecting to peers up to `RETRY_COUNT` times in case of failures.
-- **Logging Errors**: Errors are logged with appropriate log levels (`WARNING` for retries, `ERROR` for unrecoverable failures).
-
-For instance, if a connection to a peer fails, the module will retry and log each attempt, only logging an error if all retries are exhausted.
-
----
-
-## Example Workflow
-
-1. **Start Bootstrap Node**: Initialize and start the bootstrap node to enable peer discovery.
-2. **Start General Nodes**: Create general nodes, passing the bootstrap node’s address for peer discovery.
-3. **Exchange Data**: Nodes can send data to specific peers or broadcast to all peers.
-4. **Shutdown**: Gracefully shut down nodes when no longer needed.
-
-
-
