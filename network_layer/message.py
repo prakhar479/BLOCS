@@ -4,7 +4,6 @@ import random
 
 
 class Message:
-
     message_index = 0
     MESSAGE = None
     SENDER_IP = None

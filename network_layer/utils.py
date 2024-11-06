@@ -1,10 +1,17 @@
 from termcolor import colored
+import logging
+import os
+
+# Configure logging
+logging.basicConfig(
+    filename=os.path.join(os.curdir, "network.log"),
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 def print_colored(text, clr="white", endl=1):
     endline = "\n"*endl
-
-    print(colored(text, clr), end=endline)
-
+    logging.info(colored(text, clr))
 
 class bcolors:
     HEADER = '\033[95m'

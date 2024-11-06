@@ -1,8 +1,16 @@
 import socket
 import random
-# import json
+import os
+import logging
 from typing import List, Tuple, Union, Optional
 from network_layer.message import Message
+
+# Configure logging
+logging.basicConfig(
+    filename=os.path.join(os.curdir, "network.log"),
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 
 class Node:
@@ -90,8 +98,8 @@ class Node:
             node_index = -1
         if (node_index != -1):
             self.connections_json.pop(node_index)
-        print(self.nodes)
-        print(self.connections)
+        logging.debug(self.nodes)
+        logging.debug(self.connections)
 
     def getSelfOrAdjacent(self) -> Union[str, List[dict]]:
         total_adj = self.totalConection()
@@ -110,11 +118,11 @@ class Node:
             arr = list(range(0, total_adj+1))
             random.shuffle(arr)
             arr = arr[0:total_return]
-            print(f"{total_return} , {arr}")
+            logging.debug(f"{total_return} , {arr}")
             temp_json_list = list()
             for i in arr:
                 temp_json_list.append(copy_json[i])
-            print(temp_json_list)
+            logging.debug(temp_json_list)
             return temp_json_list
 
     @classmethod
@@ -134,14 +142,14 @@ class Node:
     @staticmethod
     def merge_command(cmd: str, msg: str) -> str:
         message = f"{cmd}({msg})"
-        print(message)
+        logging.debug(message)
         return message
 
     @staticmethod
     def split_command(cmd: str, msg: str) -> str:
         length = len(cmd)
         message = msg[length+1:-1]
-        print(message)
+        logging.debug(message)
         return message
 
     def create_message(self, msg: str, title: str, sender_ip: str = SERVER_IP, sender_port: Optional[int] = SERVER_PORT, reciever_ip: str = "all", reciever_port: Optional[int] = None) -> str:

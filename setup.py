@@ -5,7 +5,7 @@ import os
 import threading
 from file_layer import Distribute, Assimilate, generate_proof, verify_proof
 from network_layer import Network, Message
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any
 import socket
 import time
 
@@ -21,7 +21,7 @@ class P2PFileStorageCLI:
         self.network = Network(ip)
         self.port = port
         self.genesis_ip = genesis_ip
-        # Stores file metadata: file_id -> {filename, size, extension, shard_mapping, peer mapping, shard_metadata}
+        # Stores file metadata: file_id -> {filename, size, extension, shard_mapping, peer_mapping}
         self.file_table: Dict[str, Dict[str, Any]] = {}
         self.network.start(port)
         self.client_address = client_address

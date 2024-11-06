@@ -3,9 +3,9 @@ import time
 import random
 import string
 from web3 import Web3
-import json
-from eth_typing import HexStr
-from eth_utils import to_bytes
+# import json
+# from eth_typing import HexStr
+# from eth_utils import to_bytes
 
 # function from client to propose a deal
 def propose_deal(client_address, value, client_private_key, file_id, storage_space, duration_hours):
@@ -129,7 +129,6 @@ def complete_deal(file_id, client_address, client_private_key) -> dict:
     except Exception as e:
         print(f"Error completing deal: {str(e)}")
         raise
-
 
 # anyone can call this function
 def get_deal_status(file_id):

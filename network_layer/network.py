@@ -1,6 +1,8 @@
 import socket
 import threading
 import json
+import logging
+import os
 from typing import List, Dict, Optional, Union, Tuple
 # from .utils import bcolors
 from .utils import print_colored
@@ -9,6 +11,12 @@ import network_layer.commands as commands
 from .message import Message
 from .config import BUFFER_SIZE
 
+# Configure logging
+logging.basicConfig(
+    filename=os.path.join(os.curdir, "network.log"),
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 class Network(node.Node):
     HEADER_LEN: int = 10
@@ -37,18 +45,18 @@ class Network(node.Node):
 
         self.server.bind(self.SERVER_ADDR)
 
-        print("[LISTENING...]")
+        logging.info("[LISTENING...]")
 
         self.server.listen()
 
         while True:
             (conn, addr) = self.server.accept()
-            # print(f"{conn} {addr}")
+            # logging.debug(f"{conn} {addr}")
 
             thread = threading.Thread(target=self.handle, args=(conn, addr))
             thread.start()
 
-           # print(f"{conn} connected")
+           # logging.debug(f"{conn} connected")
 
     def start(self, port: int) -> None:
 
@@ -136,7 +144,7 @@ class Network(node.Node):
                     continue
 
                 if len(self.message_logs) >= 50000:
-                    print(f"---{len(self.message_logs)}")
+                    logging.info(f"---{len(self.message_logs)}")
                     self.message_logs.pop(0)
 
                 # CONNECT TO ME COMMAND
@@ -185,7 +193,7 @@ class Network(node.Node):
 
                     mssg = json.dumps(self.getSelfOrAdjacent())
                     mssg = f"{commands.MULTI_CONN_ADDR}{mssg}"
-                    print(mssg)
+                    logging.debug(mssg)
                     conn.send(f"{mssg}".encode(self.FORMAT))
                     # (self.connections)
                     pass
@@ -200,8 +208,6 @@ class Network(node.Node):
 
                     rndNode = json.dumps(self.getRandomNode())
 
-                    print("madarchod ", rndNode)
-
                     conn.send(f"{rndNode}".encode(self.FORMAT))
 
                 if commands.ASK_NODES_TO_CONNECT in msg["title"]:
@@ -211,15 +217,15 @@ class Network(node.Node):
                     got_nodes = self.getSelfOrAdjacent()
                     message = self.short_json_msg("", got_nodes)
                     self.reply(conn, message)
-                    print("asdasfa------------")
-                    print(message)
+                    logging.debug("----------------------------------")
+                    logging.debug(message)
                     # conn.send(f"{got_nodes}".encode(self.FORMAT))
 
                 if "#GIVE_NODES_IN_NETWORK" in msg["title"]:
 
                     node_msg = self.short_json_msg("", self.nodes_in_network)
 
-                    print(node_msg)
+                    logging.debug(node_msg)
 
                     self.reply(conn, node_msg)
 
@@ -236,7 +242,7 @@ class Network(node.Node):
 
                     self.broadcast(msg, True)
 
-                    print(f"{msg}")
+                    logging.debug(f"{msg}")
 
                     if msg['message'] == "#JOINED_IN_NETWORK":
 
@@ -246,17 +252,17 @@ class Network(node.Node):
                             msg_sender_ip = conn.getpeername()
                             msg_sender_ip = msg_sender_ip[0]
 
-                        print(conn.getpeername())
+                        logging.debug(conn.getpeername())
 
                         print_colored(f"{msg['sender_ip']}:{msg['sender_port']} has joined to network", "green")
 
                         self.nodes_in_network.append(
                             {"ip_addr": msg_sender_ip, "port": msg['sender_port']})
-                        print("NODES IN NETWORK ")
-                        print(self.nodes_in_network)
+                        logging.debug("NODES IN NETWORK ")
+                        logging.debug(self.nodes_in_network)
                 else:
 
-                    print(msg["message"])
+                    logging.debug(msg["message"])
                 
                 if msg:
                     self.handle_messages(msg, conn)
@@ -281,7 +287,7 @@ class Network(node.Node):
         if port is None:
             port = self.GENESIS_NODE_PORT
 
-        print(f"{ip}:{port}")
+        logging.info(f"{ip}:{port}")
         conn = self.create_connection(ip, port)
 
         """
@@ -296,16 +302,16 @@ class Network(node.Node):
 
         node = json.loads(random_node)
 
-        print(f"------->{node}")
+        logging.debug(f"------->{node}")
         if node is None:
 
             self.remove_connection(conn, ip, port)
 
-            print("Network is not exist...")
-            print("Connecting to Genesis Node", end="\n\n")
+            logging.info("Network is not exist...")
+            logging.info("Connecting to Genesis Node\n\n")
 
             self.connectToNode(self.GENESIS_NODE_ADDR, self.GENESIS_NODE_PORT)
-            print("asadasd")
+            logging.debug("asadasd")
 
         else:
             """
@@ -313,12 +319,12 @@ class Network(node.Node):
             """
             self.remove_connection(conn, ip, port)
             # self.connectToNode(self.GENESIS_NODE_ADDR, self.GENESIS_NODE_PORT)
-            print(node["ip_addr"])
+            logging.debug(node["ip_addr"])
             response = self.askNodes(node["ip_addr"], node["port"])
 
         temp_node = self.nodes[0]
 
-        print(self.nodes[0])
+        logging.debug(self.nodes[0])
 
         msg = Message().short_msg("#GIVE_NODES_IN_NETWORK", "")
 
@@ -355,7 +361,7 @@ class Network(node.Node):
         message = ask_random_message
 
         msg = self.send(conn, message, 1)
-        print(f"RESPONSE_RAND_NODE:{msg}")
+        logging.debug(f"RESPONSE_RAND_NODE:{msg}")
 
         disconnect_msg = self.short_json_msg(self.DISCONNECT_MSG)
         self.send(conn, disconnect_msg)
@@ -381,10 +387,10 @@ class Network(node.Node):
 
         msg = json.loads(msg)
         nodes = msg["message"]
-        print(type(nodes))
+        logging.debug(type(nodes))
 
         print_colored(f"{len(nodes)} Node address recieved...", "cyan")
-        print(nodes)
+        logging.debug(nodes)
 
         for node in nodes:
             self.connectToNode(node["ip_addr"], node["port"])
@@ -411,7 +417,7 @@ class Network(node.Node):
         return msg
 
     def connectToNode(self, address: str, port: int) -> None:
-        print(f"_______{address}_{port}_______________________-")
+        logging.debug(f"_______{address}_{port}_______________________-")
         self.CONN_ADDR = (address, port)
 
         if self.CONN_ADDR not in self.connections:
