@@ -120,11 +120,6 @@ contract ContractorFileStorage {
 
         emit ProofValidated(fileId, block.timestamp);
         // return payment;
-
-        if (block.number >= files[fileId].startTime + (files[fileId].duration * VALIDATION_INTERVAL)) {
-            completeDeal(fileId);
-        }
-
     }
 
     function invalidateDeal(bytes32 fileId, string memory reason) external payable onlyClient(fileId) dealActive(fileId) {
