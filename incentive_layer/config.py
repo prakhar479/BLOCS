@@ -1,25 +1,13 @@
 import json
 from web3 import Web3
+import yaml
 import os
 
 
-# Configuration for available networks
-NETWORKS = {
-    "mainnet": "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID",
-    "goerli": "https://goerli.infura.io/v3/YOUR_INFURA_PROJECT_ID",
-    "sepolia": "https://sepolia-rollup.arbitrum.io/rpc",
-    "local": "http://127.0.0.1:7545"  # Local Ganache
-}
-
-
 class BlockchainConfig:
-    def __init__(self, network="sepolia"):
-        # Check if network is valid
-        if network not in NETWORKS:
-            raise ValueError(f"Unsupported network '{network}'. Available networks: {list(NETWORKS.keys())}")
-        
+    def __init__(self, network="sepolia"):        
         # Initialize the Web3 object with the appropriate RPC URL
-        rpc_url = NETWORKS[network]
+        rpc_url = DEFAULT_NETWORK_URL
         self.w3 = Web3(Web3.HTTPProvider(rpc_url))
         
         if not self.w3.is_connected():
@@ -31,12 +19,7 @@ class BlockchainConfig:
             self.contract_abi = json.load(abi_file)
         
         # Contract address for each network (use separate addresses for production if needed)
-        self.contract_address = {
-            "mainnet": "YOUR_MAINNET_CONTRACT_ADDRESS",
-            "goerli": "YOUR_GOERLI_CONTRACT_ADDRESS",
-            "sepolia": "YOUR_SEPOLIA_CONTRACT_ADDRESS",
-            "local": "0xA09B19128f920Bca0D217308c831f0f0061B6cfa"
-        }.get(network)
+        self.contract_address = DEFAULT_CONTRACT_ADDRESS
         
         if not self.contract_address:
             raise ValueError(f"No contract address specified for network '{network}'")
@@ -51,10 +34,32 @@ class BlockchainConfig:
         return self.contract
 
 
+# Path to the YAML config file
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "../config.yaml")
+
+# Default values if config file or setting is missing
+DEFAULT_CONFIG = {
+    "DEFAULT_NETWORK_URL": "https://sepolia-rollup.arbitrum.io/rpc",
+    "DEFAULT_CONTRACT_ADDRESS": "0xA09B19128f920Bca0D217308c831f0f0061B6cfa",
+}
+
+# Load configuration from the YAML file
+try:
+    with open(CONFIG_PATH, "r") as config_file:
+        config_data = yaml.safe_load(config_file)
+except FileNotFoundError:
+    print(f"Configuration file not found: {CONFIG_PATH}")
+    config_data = DEFAULT_CONFIG
+
+# Get the default network URL and contract address
+DEFAULT_NETWORK_URL = config_data.get("DEFAULT_NETWORK_URL", DEFAULT_CONFIG["DEFAULT_NETWORK_URL"])
+DEFAULT_CONTRACT_ADDRESS = config_data.get("DEFAULT_CONTRACT_ADDRESS", DEFAULT_CONFIG["DEFAULT_CONTRACT_ADDRESS"])
+
+
 # Usage
 # Initialize with 'sepolia' or 'mainnet' or 'goerli' or 'local'
 try:
-    config = BlockchainConfig(network="sepolia")
+    config = BlockchainConfig()
     w3 = config.get_w3()
     contract = config.get_contract()
 except Exception as e:
