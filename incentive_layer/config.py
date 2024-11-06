@@ -9,7 +9,7 @@ w3 = Web3(Web3.HTTPProvider(rpc_server))
 contract_address = "0xA09B19128f920Bca0D217308c831f0f0061B6cfa"
 
 
-with open("abi.json", "r") as abi_file:
+with open("/Users/harpreetsingh/Desktop/BLOCS/incentive_layer/abi.json", "r") as abi_file:
     contract_abi = json.load(abi_file)
 
 contract = w3.eth.contract(address=contract_address, abi=contract_abi)

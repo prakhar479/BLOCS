@@ -1,4 +1,4 @@
-from config import contract, w3
+from .config import contract, w3
 import time
 import random
 import string
@@ -10,7 +10,7 @@ from eth_utils import to_bytes
 # function from client to propose a deal
 def propose_deal(client_address, value, client_private_key, file_id, storage_space, duration_hours):
     file_id = w3.keccak(text=file_id)
-    print(type(file_id))
+    # print(type(file_id))
     block_number = w3.eth.block_number
     print(f"Current block number: {block_number}")
 
@@ -40,7 +40,7 @@ def validate_proof(file_id, client_address, client_private_key):
         # gas_estimate = contract.functions.validateProof(file_id).estimate_gas({
         #     'from': client_address
         # })
-
+        print(f"FROM VALIDAPI{client_address}")
         # Build transaction with estimated gas
         transaction = contract.functions.validateProof(file_id).build_transaction({
             'from': client_address,
@@ -90,6 +90,8 @@ def invalidate_deal(file_id, reason, client_address, client_private_key):
     #     'from': my_address
     # })
     file_id = w3.keccak(text=file_id)
+    print(f"FROM INVALIDAPI{client_address}")
+
     transaction = contract.functions.invalidateDeal(file_id, reason).build_transaction({
         'from': client_address,
         'gas': 6721975,
@@ -101,7 +103,7 @@ def invalidate_deal(file_id, reason, client_address, client_private_key):
     return w3.to_hex(tx_hash)
 
 
-def complete_deal(w3: Web3, contract, file_id, client_address, client_private_key) -> dict:
+def complete_deal(file_id, client_address, client_private_key) -> dict:
 
     try:
 
@@ -146,27 +148,27 @@ def get_deal_status(file_id):
         "isApproved": deal[9]
     }
 
-client_address = '0xaE0e33E28AEE05144711F5000bC763e3145323ea'
-client_private_key = '0x8cde6b6f4acffa0093bb703f9aee6e4384b4f89235fe959c7e1633973932c280'
-
-server_address = '0xE70EB10De1E4F50050D6169D0985d93E92b3A322'
-server_private_key = '0x93f9a5010d72cc1cbf7e72229f605312791b594b1f181e7d1804979389af201c'
-
-
-propose_deal(client_address, 20, client_private_key, 'chiggasforfreenp', 10, 2)
-
-# Approve a deal (no Ether involved)
-approve_deal('chiggasforfreenp', 20, server_address, server_private_key)
-
-# Validate proof (no Ether involved)
-validate_proof('chiggasforfreenp', client_address, client_private_key)
-
-
-# Invalidate a deal (no Ether involved)
-# invalidate_deal('chiggasforfreenp', 'Reason for invalidation', client_address, client_private_key)
-
-# Complete a deal (no Ether involved)
-complete_deal(w3, contract, 'chiggasforfreenp', client_address, client_private_key)
-
-# Get the deal status (no Ether involved)
-deal_status = get_deal_status('chiggasforfreenp')
+# client_address = '0xaE0e33E28AEE05144711F5000bC763e3145323ea'
+# client_private_key = '0x8cde6b6f4acffa0093bb703f9aee6e4384b4f89235fe959c7e1633973932c280'
+#
+# server_address = '0xE70EB10De1E4F50050D6169D0985d93E92b3A322'
+# server_private_key = '0x93f9a5010d72cc1cbf7e72229f605312791b594b1f181e7d1804979389af201c'
+#
+#
+# propose_deal(client_address, 20, client_private_key, 'chiggasforfreenp', 10, 2)
+#
+# # Approve a deal (no Ether involved)
+# approve_deal('chiggasforfreenp', 20, server_address, server_private_key)
+#
+# # Validate proof (no Ether involved)
+# validate_proof('chiggasforfreenp', client_address, client_private_key)
+#
+#
+# # Invalidate a deal (no Ether involved)
+# # invalidate_deal('chiggasforfreenp', 'Reason for invalidation', client_address, client_private_key)
+#
+# # Complete a deal (no Ether involved)
+# complete_deal(w3, contract, 'chiggasforfreenp', client_address, client_private_key)
+#
+# # Get the deal status (no Ether involved)
+# deal_status = get_deal_status('chiggasforfreenp')

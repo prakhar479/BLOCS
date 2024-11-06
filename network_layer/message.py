@@ -22,8 +22,7 @@ class Message:
     def msg(self, message, title):
 
         ts = time.time()
-        id = hashlib.sha256(f"{self.SENDER_IP}:{self.SENDER_PORT}{self.RECIEVER_IP}:{
-                            self.RECIEVER_PORT}:{self.message_index}{ts}{self.MESSAGE}".encode()).hexdigest()
+        id = hashlib.sha256(f"{self.SENDER_IP}:{self.SENDER_PORT}{self.RECIEVER_IP}:{self.RECIEVER_PORT}:{self.message_index}{ts}{self.MESSAGE}".encode()).hexdigest()
 
         msg_obj = {
             "index": self.message_index,
@@ -44,8 +43,7 @@ class Message:
     def short_msg(self, title, message=""):
 
         ts = time.time()
-        id = hashlib.sha256(f"{random.randint(0, 99999)}{title}{
-                            message}{time}".encode()).hexdigest()
+        id = hashlib.sha256(f"{random.randint(0, 99999)}{title}{message}{time}".encode()).hexdigest()
         msg_obj = {
             "id": id,
             "title": title,
