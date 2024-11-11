@@ -5,7 +5,7 @@ import threading
 import hashlib
 from file_layer import Distribute, Assimilate
 from network_layer import Network, Message
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import socket
 
 # Constants and Global Variables
@@ -107,6 +107,9 @@ class P2PFileStorage:
             return bytes.fromhex(shard_data) if shard_data else None
         return None
 
+    def list_peers(self) -> List[tuple[str, int]]:
+        return self.network.get_peers()
+
 # Initialize the Genesis or regular node
 def initialize_node(is_genesis, port, genesis_ip):
     global cli_instance
@@ -141,6 +144,11 @@ def download_file(file_id):
 def list_files():
     files = cli_instance.list_files()
     return jsonify(files), 200
+
+@app.route('/peers', methods=['GET'])
+def list_peers():
+    peers = cli_instance.list_peers()
+    return jsonify(peers), 200
 
 # Start the Flask application
 if __name__ == "__main__":
