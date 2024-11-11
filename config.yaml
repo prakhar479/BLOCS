@@ -7,5 +7,5 @@ DEFAULT_ERROR_CORRECTION: 10 # Error correction level
 BUFFER_SIZE: 2048  # Buffer size for reading and writing data in network (bytes)
 
 ## incentive layer
-DEFAULT_NETWORK_URL: "https://sepolia-rollup.arbitrum.io/rpc" # Sepolia Arbitrum RPC URL
-DEFAULT_CONTRACT_ADDRESS: "0xA09B19128f920Bca0D217308c831f0f0061B6cfa" # Sepolia Arbitrum contract address
+DEFAULT_NETWORK_URL: "0xd457540c3f08f7F759206B5eA9a4cBa321dE60DC" # Sepolia Arbitrum RPC URL
+DEFAULT_CONTRACT_ADDRESS: "0xd457540c3f08f7F759206B5eA9a4cBa321dE60DC" # Sepolia Arbitrum contract address

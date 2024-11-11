@@ -98,10 +98,14 @@ Handles file upload, metadata storage, and retrieval:
      ```bash
      download
      ```
-     Provide the file's unique ID.
+     Provide details for all uploaded files on network.
    - **List Files**:
      ```bash
      list
+     ```
+   - **List Peers**:
+     ```bash
+     peers
      ```
    - **Exit**:
      ```bash
@@ -135,13 +139,11 @@ The protocol enables nodes to prove file possession by generating and verifying 
 - **Security**: Strong encryption and sharding protect user data.
 - **Transparency**: Immutable blockchain ledger records all actions.
 - **Incentive Model**: Token rewards encourage active participation.
-- **Redundancy**: Ensures data availability even with node failures.
+- **Privacy**: End-to-end encryption ensures data confidentiality.
 
 ## Future Work
 
 - **Scalability**: Incorporating off-chain solutions for high transaction volume.
 - **Data Availability**: Enhancing retrieval processes for large-scale deployment.
 - **Governance**: Potential integration of decentralized governance models.
-
-## License
-This project is licensed under the MIT License.
+- **Redundancy**: Implementing additional fault tolerance mechanisms.

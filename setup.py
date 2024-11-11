@@ -31,7 +31,8 @@ class P2PFileStorageCLI:
 
         # Join the network if not Genesis node
         if genesis_ip:
-            self.network.join_network()
+            print(f"Joining network with genesis IP: {genesis_ip}")
+            self.network.join_network(ip=genesis_ip)
 
     def _generate_file_id(self, file_content: bytes) -> str:
         """Generate a unique file ID based on file content using SHA-256."""
@@ -137,12 +138,12 @@ class P2PFileStorageCLI:
             "shard_index": shard_index,
             "salt": salt.hex(),
         }
-        print("SALt")
+        print("SALT")
         print(salt.hex())
         response = self.network.send(peer, self.msg_gen.msg(message, "#REQUEST_PROOF"), hasResponse=1)
         if response:
             proof = json.loads(response).get("message", {}).get("proof")
-            print(f"SEndING RESPONSE{proof}")
+            print(f"SENDING RESPONSE{proof}")
             return proof
         return None
     def retrieve_file(self, file_id: str, private_key: bytes) -> Optional[str]:
@@ -190,6 +191,18 @@ class P2PFileStorageCLI:
             print(f"Size: {info['size']} bytes")
             print(f"Extension: {info['extension']}")
             print(f"Shards: {len(info['shard_mapping'])}")
+            print("-" * 40)
+        
+        def list_peers(self) -> None:
+            """List all peers in the network."""
+            peers = self.network.get_connections()
+            if not peers:
+                print("No peers available.")
+                return
+
+            print("Peers in the network:")
+            for peer in peers:
+                print(peer)
             print("-" * 40)
 
 # RIP get random peers
@@ -329,7 +342,7 @@ def main() -> None:
 
     while True:
         command = input(
-            "Enter command (upload, download, list, clear, exit): ").strip().lower()
+            "Enter command (upload, download, list, clear, peers, exit): ").strip().lower()
 
         try:
             if command == "upload":
@@ -350,8 +363,9 @@ def main() -> None:
             elif command == "exit":
                 cli.network.stop()
                 print("Exiting program.")
-                exit(0)
-
+                os._exit(0)
+            elif command == "peers":
+                cli.list_peers()
             else:
                 print(
                     "Invalid command. Please use upload, download, list, clear, or exit.")

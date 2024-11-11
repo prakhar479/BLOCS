@@ -441,7 +441,6 @@ class Network(node.Node):
         return
 
     def broadcast(self, data: Union[str, dict], isJson: bool = False) -> None:
-
         if not isJson:
             msg = self.short_json_msg("#BROADCAST", data)
         else:

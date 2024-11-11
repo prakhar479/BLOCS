@@ -10,8 +10,8 @@ class BlockchainConfig:
         rpc_url = DEFAULT_NETWORK_URL
         self.w3 = Web3(Web3.HTTPProvider(rpc_url))
         
-        if not self.w3.is_connected():
-            raise ConnectionError(f"Could not connect to the {network} network at {rpc_url}")
+        # if not self.w3.is_connected():
+        #     raise ConnectionError(f"Could not connect to the {network} network at {rpc_url}")
 
         # Load ABI from a specified file path
         abi_path = os.path.join(os.path.dirname(__file__), "abi.json")
@@ -39,8 +39,8 @@ CONFIG_PATH = os.path.join(os.path.dirname(__file__), "../config.yaml")
 
 # Default values if config file or setting is missing
 DEFAULT_CONFIG = {
-    "DEFAULT_NETWORK_URL": "https://sepolia-rollup.arbitrum.io/rpc",
-    "DEFAULT_CONTRACT_ADDRESS": "0xA09B19128f920Bca0D217308c831f0f0061B6cfa",
+    "DEFAULT_NETWORK_URL": "https://sepolia.infura.io/v3/4ddbeaf177884a69bdf6073b94008c27",
+    "DEFAULT_CONTRACT_ADDRESS": "0xd457540c3f08f7F759206B5eA9a4cBa321dE60DC",
 }
 
 # Load configuration from the YAML file

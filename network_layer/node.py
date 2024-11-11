@@ -71,11 +71,12 @@ class Node:
             index += 1
         return result
 
-    def getRandomNode(self) -> Optional[dict]:
+    def getRandomNode(self) -> dict:
         json_temp = self.connections_json.copy()  # all active connections are copied
         total_node = self.totalConection()  # calculate total connected node
         if total_node == 0:
-            return None  # if there is no any connection, return self ip and port
+            # if there is no any connection, return self ip and port
+            return {"ip_addr": self.SERVER_IP, "port": self.SERVER_PORT}
         rnd = random.randint(0, total_node-1)  # random index
         return json_temp[rnd]
 
